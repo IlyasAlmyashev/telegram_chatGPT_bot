@@ -11,6 +11,7 @@ import school.sorokin.event.manager.telegrambot.openai.api.OpenAIClient;
 @AllArgsConstructor
 public class ChatGptService {
 
+    public static final String MODEL = "gpt-4o";
     private final OpenAIClient openAIClient;
     private final ChatGptHistoryService chatGptHistoryService;
 
@@ -29,7 +30,7 @@ public class ChatGptService {
         );
 
         var request = ChatCompletionRequest.builder()
-                .model("gpt-4")
+                .model(MODEL)
                 .messages(history.chatMessages())
                 .build();
         var response = openAIClient.createChatCompletion(request);

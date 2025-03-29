@@ -1,60 +1,89 @@
 package school.sorokin.event.manager.telegrambot.telegram;
 
+import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
-import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.bots.TelegramWebhookBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import school.sorokin.event.manager.telegrambot.telegram.message.TelegramUpdateMessageHandler;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import school.sorokin.event.manager.telegrambot.telegram.message.UpdateProcessor;
+
+import static school.sorokin.event.manager.telegrambot.Const.ERROR_MESSAGE;
+import static school.sorokin.event.manager.telegrambot.Const.UPDATE_ERROR_MESSAGE;
+import static school.sorokin.event.manager.telegrambot.Const.WEBHOOK_INIT_ERROR_MESSAGE;
 
 @Slf4j
 @Component
-public class TelegramBot extends TelegramLongPollingBot {
+public class TelegramBot extends TelegramWebhookBot {
 
-    private final TelegramUpdateMessageHandler telegramUpdateMessageHandler;
+    @Value("${bot.url}")
+    private String botUrl;
+    @Value("${bot.username}")
+    private String botUsername;
+    private final UpdateProcessor updateProcessor;
 
     public TelegramBot(
             @Value("${bot.token}") String botToken,
-            TelegramUpdateMessageHandler telegramUpdateMessageHandler
+            UpdateProcessor updateProcessor
     ) {
         super(new DefaultBotOptions(), botToken);
-        this.telegramUpdateMessageHandler = telegramUpdateMessageHandler;
+        this.updateProcessor = updateProcessor;
     }
 
-    @SneakyThrows
-    @Override
-    public void onUpdateReceived(Update update) {
+    @PostConstruct
+    public void init() {
         try {
-            var method = processUpdate(update);
-            if (method != null ) {
-                sendApiMethod(method);
-            }
-        } catch (Exception e) {
-            log.error("Error while processing update", e);
-            sendUserErrorMessage(update.getMessage().getChatId());
+            this.setWebhook(SetWebhook.builder()
+                    .url(botUrl)
+                    .build());
+        } catch (TelegramApiException e) {
+            log.error(WEBHOOK_INIT_ERROR_MESSAGE, e);
         }
     }
 
-    private BotApiMethod<?> processUpdate(Update update) {
-        return update.hasMessage()
-                ? telegramUpdateMessageHandler.handleMessage(update.getMessage())
-                : null;
+    @Override
+    public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
+
+        BotApiMethod method = null;
+
+        if (update.hasMessage()) {
+            method = updateProcessor.handleUpdate(update);
+        }
+
+        if (method != null) {
+            try {
+                sendApiMethod(method);
+
+            } catch (Exception e) {
+                log.error(UPDATE_ERROR_MESSAGE, e);
+                sendUserErrorMessage(update.getMessage().getChatId());
+            }
+        }
+
+        return method;
     }
 
     @SneakyThrows
     private void sendUserErrorMessage(Long userId) {
         sendApiMethod(SendMessage.builder()
                 .chatId(userId)
-                .text("Произошла ошибка, попробуйте позже")
+                .text(ERROR_MESSAGE)
                 .build());
     }
 
     @Override
     public String getBotUsername() {
-        return "My-test-bot";
+        return botUsername;
+    }
+
+    @Override
+    public String getBotPath() {
+        return "/update";
     }
 }

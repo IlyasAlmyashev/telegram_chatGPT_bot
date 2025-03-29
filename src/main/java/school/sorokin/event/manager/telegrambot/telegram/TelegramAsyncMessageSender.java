@@ -15,6 +15,8 @@ import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static school.sorokin.event.manager.telegrambot.Const.WAIT_MESSAGE;
+
 @Slf4j
 @Service
 public class TelegramAsyncMessageSender {
@@ -34,7 +36,7 @@ public class TelegramAsyncMessageSender {
     ) {
         log.info("Send message async: chatId={}", chatId);
         var message = defaultAbsSender.execute(SendMessage.builder()
-                        .text("Ваш запрос принят в обработку, ожидайте")
+                        .text(WAIT_MESSAGE)
                         .chatId(chatId)
                 .build());
 
