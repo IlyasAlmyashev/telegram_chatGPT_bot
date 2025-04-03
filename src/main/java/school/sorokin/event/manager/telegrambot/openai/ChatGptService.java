@@ -11,7 +11,7 @@ import school.sorokin.event.manager.telegrambot.openai.api.OpenAIClient;
 @AllArgsConstructor
 public class ChatGptService {
 
-    public static final String MODEL = "gpt-4o";
+    public static final String MODEL = "gpt-4o-mini";
     private final OpenAIClient openAIClient;
     private final ChatGptHistoryService chatGptHistoryService;
 

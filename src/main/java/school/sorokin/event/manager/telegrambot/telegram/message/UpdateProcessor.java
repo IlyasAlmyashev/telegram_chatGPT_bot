@@ -18,7 +18,6 @@ import static school.sorokin.event.manager.telegrambot.Const.HEYBOT;
 @AllArgsConstructor
 public class UpdateProcessor {
 
-//    private final TelegramCommandsDispatcher telegramCommandsDispatcher;
     private final TelegramAsyncMessageSender telegramAsyncMessageSender;
     private final TelegramTextHandler telegramTextHandler;
 
@@ -26,10 +25,6 @@ public class UpdateProcessor {
         var message = update.getMessage();
         log.trace("Message is received. message={}", message);
         var chatId = message.getChatId().toString();
-
-//        if (telegramCommandsDispatcher.isCommand(message)) {
-//            return telegramCommandsDispatcher.processCommand(message);
-//        }
 
         if (message.hasText() && message.getText().startsWith(HEYBOT)) {
             telegramAsyncMessageSender.sendMessageAsync(

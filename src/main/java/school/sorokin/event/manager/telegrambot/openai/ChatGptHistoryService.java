@@ -6,7 +6,6 @@ import school.sorokin.event.manager.telegrambot.openai.api.Message;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -15,19 +14,10 @@ public class ChatGptHistoryService {
 
     private final Map<Long, ChatHistory> chatHistoryMap = new ConcurrentHashMap<>();
 
-
-    public Optional<ChatHistory> getUserHistory(Long userId) {
-        return Optional.ofNullable(chatHistoryMap.get(userId));
-    }
-
     public void createHistory(
             Long userId
     ) {
         chatHistoryMap.put(userId, new ChatHistory(new ArrayList<>()));
-    }
-
-    public void clearHistory(Long userId) {
-        chatHistoryMap.remove(userId);
     }
 
     public ChatHistory addMessageToHistory(
