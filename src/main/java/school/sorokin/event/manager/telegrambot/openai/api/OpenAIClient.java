@@ -1,30 +1,44 @@
 package school.sorokin.event.manager.telegrambot.openai.api;
 
-import lombok.AllArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import school.sorokin.event.manager.telegrambot.common.AsyncOperationService;
 
-@AllArgsConstructor
+import java.util.concurrent.CompletableFuture;
+
+import static school.sorokin.event.manager.telegrambot.Const.OPENAI_COMPLETION_URL;
+
+@Service
+@Slf4j
 public class OpenAIClient {
 
-    public static final String URL = "https://api.openai.com/v1/chat/completions";
     private final String token;
     private final RestTemplate restTemplate;
+    private final AsyncOperationService asyncOperationService;
 
-    public ChatCompletionResponse createChatCompletion(
+    public OpenAIClient(
+            @Value("${openai.token}") String token,
+            AsyncOperationService asyncOperationService
+    ) {
+        this.token = token;
+        this.restTemplate = new RestTemplate();
+        this.asyncOperationService = asyncOperationService;
+    }
+
+    private ChatCompletionResponse createChatCompletion(
             ChatCompletionRequest request
     ) {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.set("Authorization", "Bearer " + token);
-        httpHeaders.set("Content-type", "application/json");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<ChatCompletionRequest> httpEntity = new HttpEntity<>(request, httpHeaders);
+        HttpEntity<ChatCompletionRequest> httpEntity = new HttpEntity<>(request, headers);
 
         ResponseEntity<ChatCompletionResponse> responseEntity = restTemplate.exchange(
-                URL,
+                OPENAI_COMPLETION_URL,
                 HttpMethod.POST,
                 httpEntity,
                 ChatCompletionResponse.class
@@ -32,4 +46,12 @@ public class OpenAIClient {
         return responseEntity.getBody();
     }
 
+    public CompletableFuture<ChatCompletionResponse> createChatCompletionAsync(
+            ChatCompletionRequest request
+    ) {
+        return asyncOperationService.executeAsync(
+                () -> createChatCompletion(request),
+                "OpenAI-ChatCompletion"
+        );
+    }
 }

@@ -10,7 +10,7 @@
     </parent>
     <groupId>school.sorokin.event.manager</groupId>
     <artifactId>telegram-bot</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
     <name>telegram-bot</name>
     <description>telegram-bot</description>
     <properties>
@@ -24,6 +24,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+        <groupId>javax.annotation</groupId>
+        <artifactId>javax.annotation-api</artifactId>
+        <version>1.3.2</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

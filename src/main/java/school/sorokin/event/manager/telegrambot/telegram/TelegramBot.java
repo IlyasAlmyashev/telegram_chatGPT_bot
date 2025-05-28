@@ -22,17 +22,19 @@ import static school.sorokin.event.manager.telegrambot.Const.WEBHOOK_INIT_ERROR_
 @Component
 public class TelegramBot extends TelegramWebhookBot {
 
-    @Value("${bot.url}")
-    private String botUrl;
-    @Value("${bot.username}")
-    private String botUsername;
+    private final String botUrl;
+    private final String botUsername;
     private final UpdateProcessor updateProcessor;
 
     public TelegramBot(
             @Value("${bot.token}") String botToken,
+            @Value("${bot.url}") String botUrl,
+            @Value("${bot.username}") String botUsername,
             UpdateProcessor updateProcessor
     ) {
         super(new DefaultBotOptions(), botToken);
+        this.botUrl = botUrl;
+        this.botUsername = botUsername;
         this.updateProcessor = updateProcessor;
     }
 
