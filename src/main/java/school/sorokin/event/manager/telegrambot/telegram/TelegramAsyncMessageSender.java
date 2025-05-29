@@ -25,7 +25,7 @@ public class TelegramAsyncMessageSender {
     private final AsyncOperationService asyncOperationService;
 
     public TelegramAsyncMessageSender(
-            @Lazy @Qualifier("defaultAbsSender") DefaultAbsSender defaultAbsSender,
+            @Lazy @Qualifier("mainBotSender") DefaultAbsSender defaultAbsSender,
             AsyncOperationService asyncOperationService) {
         this.defaultAbsSender = defaultAbsSender;
         this.asyncOperationService = asyncOperationService;
